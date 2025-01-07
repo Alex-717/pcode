@@ -9,17 +9,27 @@ class KK {
   }
   listen (port, cb) {
     cb()
-    this.resolveMiddleList()
+    this.resolveMiddleList(this)
   }
-  resolveMiddleList () {
-    console.log('🚀', this.middleWareList)
-    function dispatch (index) {
-      console.log('😀', index, this)
-      if (index >= this.middleWareList.length) return
-      const fn = this.middleWareList[index]
-      fn.call(this, dispatch(++index))
+  resolveMiddleList (context) {
+    
+    if (!Array.isArray(this.middleWareList)) throw new Error('middleWareList must be an Array!')
+    for (const fn of this.middleWareList) {
+      if (typeof fn !== 'function') throw new Error('middleWareList must be composed of functions!')
     }
-    dispatch.call(this, 0)
+
+    const t = this
+    function dispatch (index) {
+      const fn = t.middleWareList[index]
+      if (!fn) return Promise.resolve()
+      
+      try {
+        return Promise.resolve(fn.call(null, dispatch.bind(context, index+1)))
+      } catch (err) {
+        return Promise.reject(err)
+      }
+    }
+    return dispatch(0)
   }
 }
 
@@ -37,7 +47,11 @@ app.use(async (next) => {
 })
 app.use(async (next) => {
   console.log('fn3 start')
-  await next()
+  await new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve()
+    }, 1000)
+  })
   console.log('fn3 end')
 })
 
