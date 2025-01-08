@@ -12,19 +12,19 @@ class KK {
     this.resolveMiddleList(this)
   }
   resolveMiddleList (context) {
-    
-    if (!Array.isArray(this.middleWareList)) throw new Error('middleWareList must be an Array!')
-    for (const fn of this.middleWareList) {
-      if (typeof fn !== 'function') throw new Error('middleWareList must be composed of functions!')
+    const middleList = this.middleWareList
+    if (!Array.isArray(middleList)) throw new TypeError('middleList must be an Array')
+    for (const fn of middleList) {
+      if (typeof fn !== 'function') {
+        throw new TypeError('middleList must be the compose of functions')
+      }
     }
 
-    const t = this
     function dispatch (index) {
-      const fn = t.middleWareList[index]
+      const fn = middleList[index]
       if (!fn) return Promise.resolve()
-      
       try {
-        return Promise.resolve(fn.call(null, dispatch.bind(context, index+1)))
+        return Promise.resolve(fn(context, dispatch.bind(null, index + 1)))
       } catch (err) {
         return Promise.reject(err)
       }
