@@ -1,4 +1,4 @@
-
+// https://github.com/koajs/compose/tree/master
 
 class KK {
   constructor () {
